@@ -1,28 +1,22 @@
-from quick2wire.i2c import I2CMaster, writing_bytes, reading
 import time
+import smbus
 
 class i2c:
 	
 	def __init__(self, port, addr, debug = False):
-		self.i2c_device = I2CMaster(port)
+		self.bus = smbus.SMBus(port)
 		self.addr = addr
-		
 		self.debug = debug
 		
 	def write_byte(self, *bytes):
-		self.i2c_device.transaction(
-			writing_bytes(self.addr, *bytes))
+		self.bus.write_byte_data(self.addr, *bytes)
 				
 	def read_byte(self, register):
-		byte = self.i2c_device.transaction(
-			writing_bytes(self.addr, register),
-			reading(self.addr, 1))[0][0]
+		byte = self.bus.read_i2c_block_data(self.addr, register, 1)[0]
 		return byte
 	
 	def read_16bit(self, register, flip = False):
-		data = self.i2c_device.transaction(
-			writing_bytes(self.addr, register),
-			reading(self.addr, 2))[0]
+		data = self.bus.read_i2c_block_data(self.addr, register, 2)
 		
 		if flip:
 			bit16 = (data[1] << 8) | data[0]
@@ -39,9 +33,7 @@ class i2c:
 		return self.twosToInt(s_int, 16)
 	
 	def read_3s16int(self, register, flip = False):
-		data = self.i2c_device.transaction(
-			writing_bytes(self.addr, register),
-			reading(self.addr, 6))[0]
+		data = self.bus.read_i2c_block_data(self.addr, register, 6)
 			
 		if self.debug:
 			print("3 signed 16: %s " % ', '.join(map(hex, data)))

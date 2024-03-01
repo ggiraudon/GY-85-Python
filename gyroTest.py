@@ -1,5 +1,5 @@
-import sys
-sys.path.insert(1,'/home/pi/i2clibraries')
+import sys,os
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/i2clibraries")
 from i2c_itg3205 import *
 from time import *
 
